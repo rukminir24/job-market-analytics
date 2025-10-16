@@ -1,0 +1,42 @@
+from flask import Flask, render_template, jsonify
+import pandas as pd
+
+app = Flask(_name_)
+
+# Load dataset
+data = pd.read_csv("../data/jobs_dataset.csv")
+
+# Data Cleaning
+data['Company'].fillna('Unknown', inplace=True)
+data['Location'].fillna('Unknown', inplace=True)
+data['Skills'].fillna('', inplace=True)
+data['Job_Title'].fillna('Unknown', inplace=True)
+
+# API route for top companies
+@app.route('/api/top_companies')
+def top_companies():
+    top = data['Company'].value_counts().head(10)
+    return jsonify({'companies': top.index.tolist(), 'counts': top.values.tolist()})
+
+# API route for top roles
+@app.route('/api/top_roles')
+def top_roles():
+    top = data['Job_Title'].value_counts().head(10)
+    return jsonify({'roles': top.index.tolist(), 'counts': top.values.tolist()})
+
+# API route for top locations
+@app.route('/api/top_locations')
+def top_locations():
+    top = data['Location'].value_counts().head(10)
+    return jsonify({'locations': top.index.tolist(), 'counts': top.values.tolist()})
+
+# API route for top skills
+@app.route('/api/top_skills')
+def top_skills():
+    skills_series = data['Skills'].str.split(',', expand=True).stack().str.strip()
+    top = skills_series.value_counts().head(15)
+    return jsonify({'skills': top.index.tolist(), 'counts': top.values.tolist()})
+
+# Run server
+if _name_ == '_main_':
+    app.run(debug=True)
