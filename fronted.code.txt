@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Job Market Analytics Dashboard</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <header>
+    <h1>Job Market Analytics Dashboard</h1>
+  </header>
+
+  <section class="filters">
+    <label for="industry">Select Industry:</label>
+    <select id="industry">
+      <option value="all">All</option>
+      <option value="it">IT</option>
+      <option value="finance">Finance</option>
+      <option value="healthcare">Healthcare</option>
+    </select>
+  </section>
+
+  <section class="charts">
+    <div class="chart-container">
+      <canvas id="jobTrendChart"></canvas>
+    </div>
+  </section>
+
+  <section class="skills">
+    <h2>Top In-Demand Skills</h2>
+    <div class="skills-list" id="skillsList">
+      <!-- Skills will be inserted here by JS -->
+    </div>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>
