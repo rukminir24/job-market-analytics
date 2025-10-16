@@ -1,0 +1,89 @@
+# 💼 Job Market Analytics & Skill Demand Analysis
+
+# --- Import Libraries ---
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from wordcloud import WordCloud
+
+# --- Load Dataset ---
+# Sample dataset should have: Job_Title, Company, Location, Skills, Date_Posted
+data = pd.read_csv("data/jobs_dataset.csv")
+
+# --- Basic Info ---
+print("Dataset Shape:", data.shape)
+print("\nMissing Values:\n", data.isnull().sum())
+print("\nSample Data:\n", data.head())
+
+# --- Data Cleaning ---
+# Fill missing values with 'Unknown' for categorical columns
+data['Company'].fillna('Unknown', inplace=True)
+data['Location'].fillna('Unknown', inplace=True)
+data['Skills'].fillna('', inplace=True)
+data['Job_Title'].fillna('Unknown', inplace=True)
+
+# Convert 'Date_Posted' to datetime if present
+if 'Date_Posted' in data.columns:
+    data['Date_Posted'] = pd.to_datetime(data['Date_Posted'], errors='coerce')
+
+# --- Analysis 1: Top Hiring Companies ---
+top_companies = data['Company'].value_counts().head(10)
+plt.figure(figsize=(10,5))
+sns.barplot(x=top_companies.values, y=top_companies.index, palette='viridis')
+plt.title("Top 10 Hiring Companies")
+plt.xlabel("Number of Job Postings")
+plt.ylabel("Company")
+plt.show()
+
+# --- Analysis 2: Top Job Roles ---
+top_roles = data['Job_Title'].value_counts().head(10)
+plt.figure(figsize=(10,5))
+sns.barplot(x=top_roles.values, y=top_roles.index, palette='magma')
+plt.title("Top 10 Job Roles")
+plt.xlabel("Number of Job Postings")
+plt.ylabel("Job Title")
+plt.show()
+
+# --- Analysis 3: Location-wise Job Distribution ---
+top_locations = data['Location'].value_counts().head(10)
+plt.figure(figsize=(10,5))
+sns.barplot(x=top_locations.values, y=top_locations.index, palette='coolwarm')
+plt.title("Top 10 Job Locations")
+plt.xlabel("Number of Job Postings")
+plt.ylabel("Location")
+plt.show()
+
+# --- Analysis 4: Most In-demand Skills ---
+# Split comma-separated skills into list and flatten
+skills_series = data['Skills'].str.split(',', expand=True).stack()
+skills_series = skills_series.str.strip()  # remove extra spaces
+top_skills = skills_series.value_counts().head(15)
+
+# Wordcloud for skills
+wordcloud = WordCloud(width=800, height=400, background_color='white').generate_from_frequencies(top_skills)
+plt.figure(figsize=(15,7))
+plt.imshow(wordcloud, interpolation='bilinear')
+plt.axis('off')
+plt.title("Top 15 Most In-demand Skills", fontsize=20)
+plt.show()
+
+# --- Analysis 5: Job Posting Trends Over Time ---
+if 'Date_Posted' in data.columns:
+    postings_over_time = data.groupby(data['Date_Posted'].dt.to_period('M')).size()
+    postings_over_time.index = postings_over_time.index.to_timestamp()
+    
+    plt.figure(figsize=(12,5))
+    sns.lineplot(x=postings_over_time.index, y=postings_over_time.values, marker='o')
+    plt.title("Job Posting Trends Over Time")
+    plt.xlabel("Month")
+    plt.ylabel("Number of Job Postings")
+    plt.xticks(rotation=45)
+    plt.show()
+
+# --- Summary ---
+print("\nSummary:")
+print(f"Total Job Postings: {data.shape[0]}")
+print(f"Unique Companies: {data['Company'].nunique()}")
+print(f"Unique Locations: {data['Location'].nunique()}")
+print(f"Unique Skills Listed: {skills_series.nunique()}")
