@@ -1,0 +1,69 @@
+import java.io.*;
+import java.util.*;
+import java.util.stream.*;
+
+public class JobMarketAnalytics {
+    public static void main(String[] args) {
+        String file = "data/jobs_dataset.csv";
+        List<String[]> data = new ArrayList<>();
+
+        // --- Read CSV ---
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            br.readLine(); // skip header
+            while ((line = br.readLine()) != null) {
+                String[] row = line.split(",");
+                data.add(row);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        // --- Top Companies ---
+        Map<String, Long> companyCount = data.stream()
+            .collect(Collectors.groupingBy(row -> row[1].isEmpty() ? "Unknown" : row[1], Collectors.counting()));
+
+        System.out.println("Top Companies:");
+        companyCount.entrySet().stream()
+            .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+            .limit(10)
+            .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
+
+        // --- Top Job Roles ---
+        Map<String, Long> roleCount = data.stream()
+            .collect(Collectors.groupingBy(row -> row[0].isEmpty() ? "Unknown" : row[0], Collectors.counting()));
+
+        System.out.println("\nTop Job Roles:");
+        roleCount.entrySet().stream()
+            .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+            .limit(10)
+            .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
+
+        // --- Top Locations ---
+        Map<String, Long> locationCount = data.stream()
+            .collect(Collectors.groupingBy(row -> row[2].isEmpty() ? "Unknown" : row[2], Collectors.counting()));
+
+        System.out.println("\nTop Locations:");
+        locationCount.entrySet().stream()
+            .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+            .limit(10)
+            .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
+
+        // --- Skills Count ---
+        Map<String, Long> skillsCount = new HashMap<>();
+        for (String[] row : data) {
+            if (!row[3].isEmpty()) {
+                String[] skills = row[3].split(",");
+                for (String skill : skills) {
+                    skill = skill.trim();
+                    skillsCount.put(skill, skillsCount.getOrDefault(skill, 0L) + 1);
+                }
+            }
+        }
+        System.out.println("\nTop Skills:");
+        skillsCount.entrySet().stream()
+            .sorted(Map.Entry.<String, Long>comparingByValue().reversed())
+            .limit(15)
+            .forEach(entry -> System.out.println(entry.getKey() + ": " + entry.getValue()));
+    }
+}
